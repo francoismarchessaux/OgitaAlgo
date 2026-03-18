@@ -590,3 +590,58 @@ def plot_ewmpca_report(report: dict, k: int = 3, top_loadings: int = 20) -> None
         plt.title(f"PC{j+1} top {len(order)} loadings")
         plt.tight_layout()
         plt.show()
+
+
+
+
+
+
+import numpy as np
+import pandas as pd
+
+from ewmpca_with_report import (
+    alpha_from_half_life,
+    compute_ewmpca_report,
+    print_ewmpca_report_summary,
+    report_to_dataframes,
+    plot_ewmpca_report,
+)
+
+# X_df: DataFrame of shape (281, 224)
+# rows = dates
+# columns = vol surface nodes
+# values = daily moves in vol
+X_df = your_surface_moves_df.copy()
+
+X = X_df.to_numpy(dtype=float)
+dates = X_df.index
+feature_names = X_df.columns.tolist()
+
+# portfolio exposure in the same 224-node space
+portfolio_exposure = your_exposure_vector  # shape (224,)
+
+alpha = alpha_from_half_life(20)
+
+report = compute_ewmpca_report(
+    X=X,
+    portfolio_exposure=portfolio_exposure,
+    ks=(1, 2, 3, 4, 5),
+    alpha=alpha,
+    feature_names=feature_names,
+    dates=dates,
+    tol=1e-4,
+    max_iter_count=2,
+    prime_size=50,
+)
+
+print_ewmpca_report_summary(report)
+dfs = report_to_dataframes(report)
+
+loadings_df = dfs["loadings"]
+explained_variance_df = dfs["explained_variance"]
+scores_df = dfs["scores"]
+
+pnl_3pc_df = dfs["pnl_by_k"][3]
+exposure_3pc_df = dfs["exposures_by_k"][3]
+
+plot_ewmpca_report(report, k=3, top_loadings=20)
