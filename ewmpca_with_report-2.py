@@ -764,3 +764,30 @@ def plot_ewmpca_report(report: dict, k: int = 3, top_loadings: int = 20) -> None
         plt.title(f"PC{j+1} top {len(order)} loadings")
         plt.tight_layout()
         plt.show()
+
+
+
+
+# Usage
+from ewmpca_with_report import (
+    alpha_from_half_life,
+    compute_ewmpca_report,
+    print_ewmpca_report_summary,
+    report_to_dataframes,
+    plot_ewmpca_report,
+)
+
+report = compute_ewmpca_report(
+    X=X,                                # shape (281, 224)
+    portfolio_exposure=portfolio_exposure,  # shape (224,)
+    ks=(1, 2, 3, 4, 5),
+    alpha=alpha_from_half_life(20),
+    feature_names=feature_names,
+    dates=dates,
+    tol=1e-4,
+    max_iter_count=2,
+    prime_size=50,
+)
+
+print_ewmpca_report_summary(report)
+dfs = report_to_dataframes(report)
